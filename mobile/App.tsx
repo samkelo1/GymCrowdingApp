@@ -1,74 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, Button, ActivityIndicator } from 'react-native';
-
-type CapacityResponse = { gymId: string; slot: string; percent: number };
-
-function useGymCapacity(gymId: string, slot?: string) {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<CapacityResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCapacity = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const q = slot ? `?slot=${encodeURIComponent(slot)}` : '';
-      const res = await fetch(`http://localhost:3000/gyms/${gymId}/capacity${q}`);
-      if (!res.ok) throw new Error(await res.text());
-      const json = await res.json();
-      setData(json);
-    } catch (err: any) {
-      setError(err.message ?? 'Unknown');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchCapacity(); }, []);
-
-  return { loading, data, error, refresh: fetchCapacity };
-}
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import RegisterScreen from './src/screens/RegisterScreen';
+import LoginScreen from './src/screens/LoginScreen';
+import BookingScreen from './src/screens/BookingScreen';
 
 export default function App() {
-  const gymId = 'gym-1';
-  const { loading, data, error, refresh } = useGymCapacity(gymId);
-  const [bookingState, setBookingState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [token, setToken] = useState<string | null>(null);
+  const [page, setPage] = useState<'login' | 'register' | 'booking'>('login');
 
-  const book = async () => {
-    setBookingState('loading');
-    try {
-      const res = await fetch(`http://localhost:3000/gyms/${gymId}/book`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: 'mobile-user-1' }),
-      });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt);
-      }
-      setBookingState('success');
-      refresh();
-    } catch (err) {
-      setBookingState('error');
-    }
-  };
+  const handleRegistered = (t: string) => { setToken(t); setPage('booking'); };
+  const handleLoggedIn = (t: string) => { setToken(t); setPage('booking'); };
+  const handleLogout = () => { setToken(null); setPage('login'); };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Gym Live Capacity</Text>
-      {loading ? <ActivityIndicator /> : (
-        <View style={styles.capacityBox}>
-          <Text style={styles.capacityText}>{data ? `${data.percent}%` : '--'}</Text>
-          <Text>Slot: {data?.slot ?? 'current'}</Text>
-        </View>
+      {token ? (
+        <BookingScreen token={token} onLogout={handleLogout} />
+      ) : page === 'login' ? (
+        <LoginScreen onLoggedIn={handleLoggedIn} switchToRegister={() => setPage('register')} />
+      ) : (
+        <RegisterScreen onRegistered={handleRegistered} switchToLogin={() => setPage('login')} />
       )}
-      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
-
-      <View style={{ marginTop: 20 }}>
-        <Button title={bookingState === 'loading' ? 'Booking...' : 'Book Slot'} onPress={book} disabled={bookingState === 'loading'} />
-        {bookingState === 'success' && <Text style={{ color: 'green' }}>Booked</Text>}
-        {bookingState === 'error' && <Text style={{ color: 'red' }}>Booking failed</Text>}
-      </View>
     </View>
   );
 }

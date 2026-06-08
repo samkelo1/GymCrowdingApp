@@ -1,8 +1,10 @@
 import Fastify from 'fastify';
 import gymsRoutes from './routes/gyms';
+import authRoutes from './routes/auth';
 
 const server = Fastify({ logger: true });
 
+server.register(authRoutes);
 server.register(gymsRoutes);
 
 const start = async () => {
