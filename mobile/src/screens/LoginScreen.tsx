@@ -49,9 +49,9 @@ export default function LoginScreen({ onLoggedIn, switchToRegister }: Props) {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   flex: { flex: 1 },
-  container: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  title: { fontSize: 20, marginBottom: 12 },
-  input: { width: '100%', maxWidth: 420, borderWidth: 1, padding: 12, marginBottom: 12, borderRadius: 8 },
-  row: { width: '100%', maxWidth: 420, marginBottom: 8 },
+  container: { flexGrow: 1, justifyContent: 'center', padding: 20 },
+  title: { fontSize: 20, marginBottom: 12, textAlign: 'center' },
+  input: { width: '100%', borderWidth: 1, padding: 12, marginBottom: 12, borderRadius: 8 },
+  row: { width: '100%', marginBottom: 8 },
   error: { color: 'red', marginTop: 8 }
 });

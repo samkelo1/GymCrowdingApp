@@ -12,9 +12,13 @@ export class ApiStack extends cdk.Stack {
     super(scope, id, props);
 
     // Recommended: bundle the backend via NodejsFunction for correct packaging
+    // Note: `entry` should point to a Lambda-compatible handler file that
+    // exports a `handler` (e.g. backend/src/lambda.ts) which adapts your
+    // Fastify/Express app for Lambda (aws-serverless-fastify / @vendia/serverless-express).
+    const redisParam = ssm.StringParameter.fromStringParameterName(this, '/gymcrowding/redis/url');
     const apiFn = new NodejsFunction(this, 'GymApiFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
-      entry: path.join(__dirname, '..', 'backend', 'src', 'server.ts'),
+      entry: path.join(__dirname, '..', 'backend', 'src', 'lambda.ts'),
       handler: 'handler',
       bundling: {
         externalModules: ['aws-sdk'],
@@ -22,8 +26,8 @@ export class ApiStack extends cdk.Stack {
       memorySize: 512,
       timeout: cdk.Duration.seconds(10),
       environment: {
-        // populate at deploy time or via SSM
-        REDIS_URL: ssm.StringParameter.valueForStringParameter(this, '/gymcrowding/redis/url') || '',
+        // resolved at deploy/runtime via CloudFormation dynamic reference
+        REDIS_URL: redisParam.stringValue,
       },
     });
 
@@ -32,10 +36,10 @@ export class ApiStack extends cdk.Stack {
       proxy: true,
     });
 
-    // Allow Lambda to read SSM parameter for REDIS URL (if you store it there)
+    // Allow Lambda to read the specific SSM parameter for REDIS URL
     apiFn.addToRolePolicy(new iam.PolicyStatement({
       actions: ['ssm:GetParameter', 'ssm:GetParameters'],
-      resources: ['*'],
+      resources: [redisParam.parameterArn],
     }));
   }
 }

@@ -9,15 +9,16 @@
     "test": "vitest"
   },
   "dependencies": {
-    "fastify": "^4.0.0",
+    "fastify": "^5.8.5",
+    "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.3",
-    "ioredis": "^5.3.2"
+    "aws-serverless-fastify": "^0.8.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^18.0.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^6.0.3",
-    "vitest": "^0.31.0"
+    "vitest": "^4.1.8"
   }
 }

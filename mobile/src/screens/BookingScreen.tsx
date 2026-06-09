@@ -47,8 +47,8 @@ export default function BookingScreen({ token, onLogout }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <SafeAreaView style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <Text style={styles.heading}>Booking</Text>
           <Button title="Logout" onPress={onLogout} />
@@ -74,11 +74,11 @@ export default function BookingScreen({ token, onLogout }: Props) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { flexGrow: 1, padding: 20, alignItems: 'center', justifyContent: 'center' },
+  container: { flexGrow: 1, padding: 20, justifyContent: 'center' },
   header: { width: '100%', maxWidth: 600, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   heading: { fontSize: 18 },
-  card: { width: '100%', maxWidth: 600, padding: 16, borderWidth: 1, marginTop: 12, alignItems: 'center', borderRadius: 8 },
+  card: { width: '100%', padding: 16, borderWidth: 1, marginTop: 12, alignItems: 'center', borderRadius: 8 },
   percent: { fontSize: 36, fontWeight: '600' },
-  row: { width: '100%', maxWidth: 600, marginTop: 20 },
+  row: { width: '100%', marginTop: 20 },
   error: { color: 'red', marginTop: 8 }
 });

@@ -4,39 +4,48 @@ import authRoutes from './routes/auth';
 import { MockGymRepository } from './services/mockGymRepository';
 import RedisGymRepository from './services/redisGymRepository';
 
-const server = Fastify({ logger: true });
+export async function buildServer() {
+  const server = Fastify({ logger: true });
 
-server.register(authRoutes);
-server.register(gymsRoutes);
+  server.register(authRoutes);
+  server.register(gymsRoutes);
 
-// Choose repository: use Redis if REDIS_URL provided, otherwise mock
-const redisUrl = process.env.REDIS_URL;
-let repo: any;
-if (redisUrl) {
-  server.log.info('Using RedisGymRepository');
-  repo = new RedisGymRepository(redisUrl);
-  // seed sample gym if not present
-  (async () => {
-    const gym = await repo.getGym('gym-1');
-    if (!gym) {
-      await repo.seedGym({ id: 'gym-1', maxCapacity: 5 });
-    }
-  })();
-} else {
-  server.log.info('Using MockGymRepository');
-  repo = new MockGymRepository();
+  // Choose repository: use Redis if REDIS_URL provided, otherwise mock
+  const redisUrl = process.env.REDIS_URL;
+  let repo: any;
+  if (redisUrl) {
+    server.log.info('Using RedisGymRepository');
+    repo = new RedisGymRepository(redisUrl);
+    // seed sample gym if not present
+    (async () => {
+      const gym = await repo.getGym('gym-1');
+      if (!gym) {
+        await repo.seedGym({ id: 'gym-1', maxCapacity: 5 });
+      }
+    })();
+  } else {
+    server.log.info('Using MockGymRepository');
+    repo = new MockGymRepository();
+  }
+
+  // decorate server with repo so routes can access
+  server.decorate('repo', repo);
+
+  // ensure plugins and routes are ready
+  await server.ready();
+
+  return server;
 }
 
-// decorate server with repo so routes can access
-server.decorate('repo', repo);
-
-const start = async () => {
-  try {
-    await server.listen({ port: 3000, host: '0.0.0.0' });
-  } catch (err) {
-    server.log.error(err);
-    process.exit(1);
-  }
-};
-
-start();
+// If server.ts is executed directly, start an HTTP server for local dev
+if (require.main === module) {
+  (async () => {
+    const server = await buildServer();
+    try {
+      await server.listen({ port: 3000, host: '0.0.0.0' });
+    } catch (err) {
+      server.log.error(err);
+      process.exit(1);
+    }
+  })();
+}
