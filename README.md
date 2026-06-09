@@ -26,6 +26,19 @@ npm install
 npm start
 ```
 
+Redis (optional - production / bonus):
+
+If you want to enable Redis-backed capacity and locking, set `REDIS_URL` in the backend environment (e.g., `redis://host:6379`). When set, the backend will use Redis for slot bookings and capacity reads. The CDK snippet includes an example of reading the Redis endpoint from SSM under `/gymcrowding/redis/url`.
+
+Smoke test (local):
+
+Run a small smoke script that registers, books, and reads capacity:
+
+```powershell
+cd backend
+node scripts/smoke-test.js
+```
+
 Design & Architecture Decisions (concise):
 
 - Concurrency: booking uses a per-gym async mutex (`AsyncMutex`) to serialize critical booking sections. This prevents race conditions and overbooking under high concurrent requests.

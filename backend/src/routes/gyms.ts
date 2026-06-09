@@ -4,7 +4,8 @@ import { MockGymRepository } from '../services/mockGymRepository';
 import { AuthService } from '../services/authService';
 
 export default async function gymsRoutes(fastify: FastifyInstance) {
-  const repo = new MockGymRepository();
+  // repository is decorated on server (either MockGymRepository or RedisGymRepository)
+  const repo = (fastify as any).repo as any;
   const service = new GymService(repo);
   const auth = new AuthService();
 

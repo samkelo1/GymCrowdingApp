@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, View, Text, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
+import FullWidthButton from '../components/FullWidthButton';
 
 type Props = {
   onRegistered: (token: string) => void;
@@ -33,12 +34,12 @@ export default function RegisterScreen({ onRegistered, switchToLogin }: Props) {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Register</Text>
-          <TextInput placeholder="Username" value={username} onChangeText={setUsername} style={styles.input} />
-          <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
-          <View style={styles.row}><Button title={loading ? 'Registering...' : 'Register'} onPress={register} disabled={loading} /></View>
+          <TextInput placeholder="Username" value={username} onChangeText={setUsername} style={styles.input} autoCapitalize="none" returnKeyType="next" />
+          <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} returnKeyType="done" />
+          <View style={styles.row}><FullWidthButton title={loading ? 'Registering...' : 'Register'} onPress={register} disabled={loading} /></View>
           {loading && <ActivityIndicator style={{ marginTop: 8 }} />}
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <View style={styles.row}><Button title="Have an account? Login" onPress={switchToLogin} /></View>
+          <View style={styles.row}><FullWidthButton title="Have an account? Login" onPress={switchToLogin} /></View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -50,7 +51,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
   title: { fontSize: 20, marginBottom: 12 },
-  input: { width: '100%', maxWidth: 420, borderWidth: 1, padding: 10, marginBottom: 12, borderRadius: 6 },
+  input: { width: '100%', maxWidth: 420, borderWidth: 1, padding: 12, marginBottom: 12, borderRadius: 8 },
   row: { width: '100%', maxWidth: 420, marginBottom: 8 },
   error: { color: 'red', marginTop: 8 }
 });
