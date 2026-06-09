@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
+import { SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
 
 type Props = {
   onRegistered: (token: string) => void;
@@ -10,9 +10,11 @@ export default function RegisterScreen({ onRegistered, switchToLogin }: Props) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const register = async () => {
     setError(null);
+    setLoading(true);
     try {
       const res = await fetch('http://localhost:3000/auth/register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password })
@@ -23,16 +25,32 @@ export default function RegisterScreen({ onRegistered, switchToLogin }: Props) {
     } catch (err: any) {
       setError(err.message);
     }
+    finally { setLoading(false); }
   };
 
   return (
-    <View style={{ padding: 16 }}>
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>Register</Text>
-      <TextInput placeholder="Username" value={username} onChangeText={setUsername} style={{ borderWidth: 1, padding: 8, marginBottom: 8 }} />
-      <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={{ borderWidth: 1, padding: 8, marginBottom: 8 }} />
-      <Button title="Register" onPress={register} />
-      {error ? <Text style={{ color: 'red', marginTop: 8 }}>{error}</Text> : null}
-      <Button title="Have an account? Login" onPress={switchToLogin} />
-    </View>
+    <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <Text style={styles.title}>Register</Text>
+          <TextInput placeholder="Username" value={username} onChangeText={setUsername} style={styles.input} />
+          <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
+          <View style={styles.row}><Button title={loading ? 'Registering...' : 'Register'} onPress={register} disabled={loading} /></View>
+          {loading && <ActivityIndicator style={{ marginTop: 8 }} />}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+          <View style={styles.row}><Button title="Have an account? Login" onPress={switchToLogin} /></View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  flex: { flex: 1 },
+  container: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  title: { fontSize: 20, marginBottom: 12 },
+  input: { width: '100%', maxWidth: 420, borderWidth: 1, padding: 10, marginBottom: 12, borderRadius: 6 },
+  row: { width: '100%', maxWidth: 420, marginBottom: 8 },
+  error: { color: 'red', marginTop: 8 }
+});

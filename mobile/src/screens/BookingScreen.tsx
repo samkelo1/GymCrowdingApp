@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, ActivityIndicator } from 'react-native';
+import { SafeAreaView, ScrollView, View, Text, Button, ActivityIndicator, StyleSheet } from 'react-native';
 
 type Props = { token: string; onLogout: () => void };
 
@@ -47,25 +47,38 @@ export default function BookingScreen({ token, onLogout }: Props) {
   };
 
   return (
-    <View style={{ padding: 16 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={{ fontSize: 18 }}>Booking</Text>
-        <Button title="Logout" onPress={onLogout} />
-      </View>
-
-      {loading ? <ActivityIndicator /> : (
-        <View style={{ padding: 16, borderWidth: 1, marginTop: 12 }}>
-          <Text style={{ fontSize: 28 }}>{data ? `${data.percent}%` : '--'}</Text>
-          <Text>Slot: {data?.slot ?? 'current'}</Text>
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.heading}>Booking</Text>
+          <Button title="Logout" onPress={onLogout} />
         </View>
-      )}
-      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
 
-      <View style={{ marginTop: 20 }}>
-        <Button title={bookingState === 'loading' ? 'Booking...' : 'Book Slot'} onPress={book} disabled={bookingState === 'loading'} />
+        {loading ? <ActivityIndicator /> : (
+          <View style={styles.card}>
+            <Text style={styles.percent}>{data ? `${data.percent}%` : '--'}</Text>
+            <Text>Slot: {data?.slot ?? 'current'}</Text>
+          </View>
+        )}
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <View style={styles.row}>
+          <Button title={bookingState === 'loading' ? 'Booking...' : 'Book Slot'} onPress={book} disabled={bookingState === 'loading'} />
+        </View>
         {bookingState === 'success' && <Text style={{ color: 'green' }}>Booked</Text>}
         {bookingState === 'error' && <Text style={{ color: 'red' }}>Booking failed</Text>}
-      </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  container: { flexGrow: 1, padding: 20, alignItems: 'center', justifyContent: 'center' },
+  header: { width: '100%', maxWidth: 600, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  heading: { fontSize: 18 },
+  card: { width: '100%', maxWidth: 600, padding: 16, borderWidth: 1, marginTop: 12, alignItems: 'center', borderRadius: 8 },
+  percent: { fontSize: 36, fontWeight: '600' },
+  row: { width: '100%', maxWidth: 600, marginTop: 20 },
+  error: { color: 'red', marginTop: 8 }
+});

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
+import { SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 
 type Props = {
   onLoggedIn: (token: string) => void;
@@ -10,6 +11,7 @@ export default function LoginScreen({ onLoggedIn, switchToRegister }: Props) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const login = async () => {
     setError(null);
@@ -22,17 +24,34 @@ export default function LoginScreen({ onLoggedIn, switchToRegister }: Props) {
       onLoggedIn(json.token);
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={{ padding: 16 }}>
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>Login</Text>
-      <TextInput placeholder="Username" value={username} onChangeText={setUsername} style={{ borderWidth: 1, padding: 8, marginBottom: 8 }} />
-      <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={{ borderWidth: 1, padding: 8, marginBottom: 8 }} />
-      <Button title="Login" onPress={login} />
-      {error ? <Text style={{ color: 'red', marginTop: 8 }}>{error}</Text> : null}
-      <Button title="No account? Register" onPress={switchToRegister} />
-    </View>
+    <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <Text style={styles.title}>Login</Text>
+          <TextInput placeholder="Username" value={username} onChangeText={setUsername} style={styles.input} />
+          <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
+          <View style={styles.row}><Button title={loading ? 'Logging in...' : 'Login'} onPress={login} disabled={loading} /></View>
+          {loading && <ActivityIndicator style={{ marginTop: 8 }} />}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+          <View style={styles.row}><Button title="No account? Register" onPress={switchToRegister} /></View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  flex: { flex: 1 },
+  container: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  title: { fontSize: 20, marginBottom: 12 },
+  input: { width: '100%', maxWidth: 420, borderWidth: 1, padding: 10, marginBottom: 12, borderRadius: 6 },
+  row: { width: '100%', maxWidth: 420, marginBottom: 8 },
+  error: { color: 'red', marginTop: 8 }
+});

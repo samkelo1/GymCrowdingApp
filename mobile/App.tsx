@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import RegisterScreen from './src/screens/RegisterScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import BookingScreen from './src/screens/BookingScreen';
@@ -10,7 +11,28 @@ export default function App() {
 
   const handleRegistered = (t: string) => { setToken(t); setPage('booking'); };
   const handleLoggedIn = (t: string) => { setToken(t); setPage('booking'); };
-  const handleLogout = () => { setToken(null); setPage('login'); };
+  const handleLogout = async () => { await AsyncStorage.removeItem('token'); setToken(null); setPage('login'); };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const t = await AsyncStorage.getItem('token');
+        if (t) {
+          setToken(t);
+          setPage('booking');
+        }
+      } catch (err) {
+        // ignore
+      }
+    })();
+  }, []);
+
+  // persist token when it changes
+  useEffect(() => {
+    (async () => {
+      if (token) await AsyncStorage.setItem('token', token);
+    })();
+  }, [token]);
 
   return (
     <View style={styles.container}>
