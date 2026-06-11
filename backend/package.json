@@ -12,7 +12,7 @@
     "fastify": "^5.8.5",
     "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.3",
-    "aws-serverless-fastify": "^0.8.0"
+    "@vendia/serverless-express": "^4.7.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",

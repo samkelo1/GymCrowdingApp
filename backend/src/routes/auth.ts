@@ -6,8 +6,13 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
   fastify.post('/auth/register', async (request, reply) => {
     const body = request.body as any;
+    if (!body || typeof body.username !== 'string' || typeof body.password !== 'string') {
+      reply.status(400);
+      return { error: 'username and password are required' };
+    }
     try {
       const result = await auth.register(body.username, body.password);
+      reply.status(201);
       return result;
     } catch (err: any) {
       reply.status(400);
@@ -17,6 +22,10 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
   fastify.post('/auth/login', async (request, reply) => {
     const body = request.body as any;
+    if (!body || typeof body.username !== 'string' || typeof body.password !== 'string') {
+      reply.status(400);
+      return { error: 'username and password are required' };
+    }
     try {
       const result = await auth.login(body.username, body.password);
       return result;

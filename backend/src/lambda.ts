@@ -1,13 +1,15 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
-import awsServerlessFastify from 'aws-serverless-fastify';
+import { APIGatewayProxyEvent, Context } from 'aws-lambda';
+import serverlessExpress from '@vendia/serverless-express';
 import { buildServer } from './server';
 
-let proxy: any = null;
+let handler: any = null;
 
-export const handler: APIGatewayProxyHandler = async (event, context) => {
-  if (!proxy) {
+export const handlerProxy = async (event: APIGatewayProxyEvent, context: Context) => {
+  if (!handler) {
     const fastify = await buildServer();
-    proxy = awsServerlessFastify(fastify);
+    handler = serverlessExpress({ app: fastify.server });
   }
-  return proxy(event, context);
+  return handler(event, context);
 };
+
+export const handler = handlerProxy;
